@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Заметки</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 560px; margin: 40px auto; padding: 0 16px; }
+    form { display: flex; gap: 8px; }
+    input { flex: 1; padding: 8px; }
+    li { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #ddd; }
+    ul { list-style: none; padding: 0; }
+    #error { color: #b00020; min-height: 1.2em; }
+  </style>
+</head>
+<body>
+  <h1>Заметки</h1>
+  <form id="form">
+    <input id="text" placeholder="Купить молоко" autocomplete="off">
+    <button type="submit">Добавить</button>
+  </form>
+  <p id="error"></p>
+  <ul id="list"></ul>
+
+  <script>
+    const list = document.getElementById('list');
+    const form = document.getElementById('form');
+    const input = document.getElementById('text');
+    const error = document.getElementById('error');
+
+    async function load() {
+      const res = await fetch('/api/notes');
+      const notes = await res.json();
+      list.innerHTML = '';
+      notes.forEach((n) => {
+        const li = document.createElement('li');
+        const span = document.createElement('span');
+        span.textContent = n.text;
+        const btn = document.createElement('button');
+        btn.textContent = 'Удалить';
+        btn.onclick = async () => {
+          await fetch('/api/notes/' + n.id, { method: 'DELETE' });
+          load();
+        };
+        li.append(span, btn);
+        list.append(li);
+      });
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      error.textContent = '';
+      const res = await fetch('/api/notes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: input.value })
+      });
+      if (!res.ok) {
+        error.textContent = (await res.json()).error;
+        return;
+      }
+      input.value = '';
+      load();
+    });
+
+    load();
+  </script>
+</body>
+</html>

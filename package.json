@@ -1,0 +1,12 @@
+{
+  "name": "notes-app",
+  "version": "0.1.0",
+  "description": "Учебное приложение заметок для практики Docker, Git и CI/CD",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}
